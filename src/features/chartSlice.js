@@ -2,23 +2,25 @@ import { createSlice,createAsyncThunk, } from "@reduxjs/toolkit";
 import axios from "axios";
 
 
-export const fetchData=createAsyncThunk('data/fetchData',async(info)=>{
+export const fetchData=createAsyncThunk('data/fetchData',async()=>{
+    // console.log(info);
     const res=await axios.get('testResults.json');
-   const desiredData= res.data.find(u=>u.Name===info);
-   console.log(desiredData);
-    return desiredData;
-})
+//    const desiredData= res.data.find(u=>u.Name===info);
+//    console.log(desiredData);
+//    const ideal= res.data.find(u=>u.Name==="Ideal");
+// console.log(res.data);
+   return res.data;
+// if(info==="Ideal"){
+//     return ideal;
+// }
+//   return desiredData 
+}) 
 export const chartSlice=createSlice({
     name:'data',
     initialState:{
         isLoading:false,
-        usersData:{},
+        usersData:[],
         error:null
-    },
-    reducers:{
-        userData: (state,action)=>{
-            state.count=state.count + action.payload;
-        }
     },
     extraReducers:(builder)=>{
         builder.addCase(fetchData.pending,state=>{

@@ -18,45 +18,117 @@ import {
 import { fetchData, findUser } from "./chartSlice";
 import { ResponsiveContainer } from "recharts";
 const ChartView = () => {
+  const [data,setData]=useState([]);
   const [inputText,setInputText]=useState('');
-  const [details, setDetails] = useState([
-    { name: 'Sensitivity', value: 1.8 },
-    { name: 'Vigilance', value: 0.6 },
-    { name: 'Abstractedness', value: 2 },
-    { name: 'Privateness', value: 3.9 },
-    { name: 'Apprehension', value: 3.5 },
-    { name: 'Openness to change', value: 3.3 },
-  ]);
+  const [details, setDetails] = useState([]);
+  const [targetData,setTargetData]=useState([]);
+  const [idealData,setIdealData]=useState([]);
+  const [userData,setUserData]=useState({});
+  const [convertedUserDetails,setConvertedUserDetails]=useState([]);
+  const [convertedTargetData,setConvertedTargetData]=useState([]);
+  const [combinedData,setCombinedData]=useState([]);
   const dispatch = useDispatch();
+  useEffect(()=>{
+    const fetch=async()=>{
+      await dispatch(fetchData());
+    }
+    fetch();
+    
+    
+  },[])
 
-
-
-
+  const allData= useSelector(state=>state.users.usersData);
+  
+ 
  
 
   const searchText = (e) => {
    setInputText(e.target.value);
   }
   const handleSearch=async()=>{
-    console.log(inputText.toString().toLowerCase());
-    await dispatch(fetchData(inputText.toString().toLowerCase()));
-    // setDetails(userDetails)
+    
+    const desiredData= allData.find(u=>u.Name===inputText);
+     setTargetData(desiredData);
+     
+    
+    
   }
-  const userData = useSelector(state => state.users.usersData);
+ useEffect(()=>{
+
+  setData(idealData);
   
-  const userDetails = Object.entries(userData).map(u => {
-    // console.log(u);
-    return { name: u[0], value: u[1] }
-  })
+ },[idealData])
+  
+ console.log(data);
+ 
+
+
   useEffect((userData)=>{
-    setDetails(userDetails)
-    // console.log(details);
+    setData(allData);
+   
+ 
+ 
+    
   },[userData])
 
+  useEffect(()=>{
+    
+    const ideal= allData?.find(u=>u.Name==="Ideal");
+   setIdealData(ideal);
+  },[allData])
+  
+useEffect(()=>{
+  const objectConvert=async()=>{
+    const userDetails =await Object?.entries(idealData)?.map(u => {
+      // console.log(u);
+      return { name: u[0], value: u[1] }
+    })
+    setDetails(userDetails);
+    setConvertedUserDetails(userDetails);
 
+  }
+  objectConvert();
 
+},[data])
 
+useEffect(()=>{
+  const objectConvert=async()=>{
+    const userDetails =await Object?.entries(targetData)?.map(u => {
+      // console.log(u);
+      return { name: u[0], value: u[1] }
+    })
+    // setDetails(userDetails);
+    setConvertedTargetData(userDetails);
 
+  }
+  objectConvert();
+},[targetData]);
+useEffect(()=>{
+  const mergedData=[...convertedUserDetails,...convertedTargetData];
+   console.log(mergedData);
+ 
+   
+   const combined=[];
+   const newArray=[];
+   mergedData.map(object=>{
+    
+    const exist=combined?.find(newObject=>newObject.name===object.name);
+    // console.log();
+    if(exist){
+    //  console.log({...exist,value2:object.value});
+    //  console.log('in if');
+      newArray.push({...exist,user_value:object.value})
+    }
+   else{
+    combined.push(object)
+    // console.log('in else');
+  };
+  
+    });
+    
+   setDetails(newArray);
+},[convertedTargetData])
+console.log(details);
   return (
     <div style={{ width: "auto", height: "800px" }}>
       <Form className="d-flex mx-auto text-box w-50">
@@ -88,9 +160,11 @@ const ChartView = () => {
           <Tooltip />
           <Legend />
           <Area dataKey="Name" fill="#8884d8" stroke="#8884d8" />
-          <Bar dataKey="value" barSize={20} fill="#413ea0" />
+          
           <Bar dataKey="value" barSize={20} fill="red" />
-          <Line dataKey="uv" stroke="#ff7300" />
+          <Bar dataKey="user_value" barSize={20} fill="#413ea0" />
+          
+          <Line dataKey="user_value" stroke="#ff7300" />
         </ComposedChart>
       </ResponsiveContainer>
 {/* chart ends */}
